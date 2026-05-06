@@ -1,0 +1,69 @@
+{
+    "now": 176969,
+    "aircraft": [
+    {
+        "flight": "tower",
+        "hex": "A1",
+        "lat": 59.890157783431654,
+        "lon": 30.32140636354761,
+        "alt_geom": 30,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "kindergarten",
+        "hex": "K1",
+        "lat": 59.88796503164024,
+        "lon": 30.31593751518704,
+        "alt_geom": 12,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "churh",
+        "hex": "C1",
+        "lat": 59.92114766330113,
+        "lon": 30.38886603133988,
+        "alt_geom": 61,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "office",
+        "hex": "O1",
+        "lat": 59.888664470096025,
+        "lon": 30.32756747497369,
+        "alt_geom": 18,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "test",
+        "hex": "T1",
+        "lat": 59.88741759811254,
+        "lon": 30.313201261856207,
+        "alt_geom": 45,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "office neva",
+        "hex": "O2",
+        "lat": 59.931466792306814,
+        "lon": 30.40294701024355,
+        "alt_geom": 60,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "stack",
+        "hex": "S1",
+        "lat": 59.892157640830895,
+        "lon": 30.331853759646165,
+        "alt_geom": 36,
+        "gs": 0,
+        "mag_heading": 0
+    }
+
+    ]
+}

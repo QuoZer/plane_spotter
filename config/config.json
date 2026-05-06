@@ -1,0 +1,11 @@
+{   
+    "lat": 59.88641759811254,
+    "lon": 30.313201261856207,
+    "alt": 45,
+    "heading": 44.5,
+    "roll": 0.0,
+    "pitch": -1.0,
+    "camera_params_path": "/home/roser/repos/plane_spotter/config/camera.json",
+    "test_coords": "/home/roser/repos/plane_spotter/config/coords.json",
+    "test_image": "/home/roser/repos/plane_spotter/config/img.png"
+}
