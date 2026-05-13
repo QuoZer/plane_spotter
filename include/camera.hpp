@@ -2,12 +2,16 @@
 #define _USE_MATH_DEFINES
 #include "opencv2/core.hpp"
 #include "opencv2/imgproc.hpp"
+#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
 #include <math.h>
+#include <plane.hpp>
 
 
-
+namespace plane_spotter
+{
+	
 /// <summary>
 /// A parent class for all the camera models. 
 /// </summary>
@@ -19,8 +23,8 @@ public:	///* Parameters *///
 	cv::Size newSize;					
 	std::string modelName;
     
-	cv::Vec3d position;
-	cv::Vec4d rotation;
+	cv::Vec3d T;
+	VecRot R;
 
 	cv::Vec2d centerOffset;				// Distortion center
 	cv::Matx22d stretchMatrix;
@@ -45,6 +49,9 @@ public:	///* Internal functions *///
 
 	cv::Point3d rotatePoint(const cv::Point3d& worldPoint, double roll, double pitch, double yaw);
 
+	bool check_pose(cv::Point3d local_coords);
+
+
 public:		///* Settings *///
 	Camera();
 
@@ -53,7 +60,7 @@ public:		///* Settings *///
 	/// </summary>
 	/// <param name="pos"> Position in xyz coordinates </param>
 	/// <param name="rot"> Orientation in quaternion </param>
-	void setExtrinsics(cv::Vec3d pos, cv::Vec4d rot);
+	void setExtrinsics(cv::Vec3d pos, VecRot rot);
 
 	/// <summary>
 	/// Sets an identifier for the camera 
@@ -81,3 +88,6 @@ public:		///* Settings *///
 	cv::Point3d projectPixelToWorld(cv::Point2i pixel);
 
 };
+
+
+} // namespace plane_spotter

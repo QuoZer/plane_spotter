@@ -1,5 +1,8 @@
 #include "camera.hpp"
 
+namespace plane_spotter
+{
+
 Camera::Camera()
 {
     
@@ -38,10 +41,10 @@ cv::Point3d Camera::rotatePoint(const cv::Point3d& worldPoint, double roll, doub
     return cv::Point3d(new_point);         // opencv calib3d/utils  proposes this order
 }
 
-void Camera::setExtrinsics(cv::Vec3d pos, cv::Vec4d rot)
+void Camera::setExtrinsics(cv::Vec3d pos, VecRot rot)
 {
-	position = pos;
-	rotation = rot;
+	T = pos;
+	R = rot;
 }
 
 void Camera::setIntrinsics(cv::Size newsize, double xF, double yF)
@@ -56,16 +59,28 @@ void Camera::setModelName(std::string modelName)
 	this->modelName = modelName;
 }
 
+
+bool Camera::check_pose(cv::Point3d local_coords) {
+    // TODO: implement
+
+    if (local_coords.z < 0) return false;
+    
+    return true;
+}
+
 cv::Point2i Camera::projectWorldToPixel(cv::Point3d worldPoint)
 {
-    // double xFovRad = xFov * M_PI / 180;
-    // double yFovRad = yFov * M_PI / 180;
+    // correct for camera rotation 
+    cv::Point3d cam_point = rotatePoint(worldPoint, R.roll, -R.yaw, R.pitch);
+    
+    if (!check_pose(cam_point)) return {-1, -1};
+
     double xPinholeFocus = xFov;
     double yPinholeFocus = yFov;
 
-    double cx = worldPoint.x;
-    double cy = worldPoint.y;
-    double cz = worldPoint.z;
+    double cx = cam_point.x;
+    double cy = cam_point.y;
+    double cz = cam_point.z;
 
     cv::Point2i pinholePoint;
     pinholePoint.x = xPinholeFocus * cx / cz;
@@ -93,4 +108,6 @@ cv::Point3d Camera::projectPixelToWorld(cv::Point2i pixel)
     cameraCoords.z = cz;
     //std::cout << xPinholeFocus << " | " << yPinholeFocus << std::endl;
     return cameraCoords;
+}
+
 }

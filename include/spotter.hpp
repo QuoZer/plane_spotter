@@ -40,11 +40,9 @@ namespace plane_spotter
 
     private:
 
-        void draw(cv::Mat& canvas, std::string name, cv::Point2d target);
+        void draw(cv::Mat& canvas, std::string name, cv::Point2d target, cv::Point2d prediction);
 
         void upd_history(const AircraftMsg& new_msg);
-
-        bool check_pose(cv::Point3d local_coords);
 
     };
     
