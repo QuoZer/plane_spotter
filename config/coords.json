@@ -2,29 +2,20 @@
     "now": 176969,
     "aircraft": [
     {
-        "flight": "tower",
-        "hex": "A1",
-        "lat": 59.890157783431654,
-        "lon": 30.32140636354761,
-        "alt_geom": 30,
-        "gs": 0,
-        "mag_heading": 0
-    },
-    {
         "flight": "kindergarten",
         "hex": "K1",
         "lat": 59.88796503164024,
         "lon": 30.31593751518704,
-        "alt_geom": 12,
+        "alt_geom": 10,
         "gs": 0,
         "mag_heading": 0
     },
     {
-        "flight": "churh",
+        "flight": "church",
         "hex": "C1",
         "lat": 59.92114766330113,
         "lon": 30.38886603133988,
-        "alt_geom": 61,
+        "alt_geom": 45,
         "gs": 0,
         "mag_heading": 0
     },
@@ -51,7 +42,7 @@
         "hex": "O2",
         "lat": 59.931466792306814,
         "lon": 30.40294701024355,
-        "alt_geom": 60,
+        "alt_geom": 45,
         "gs": 0,
         "mag_heading": 0
     },
@@ -61,6 +52,69 @@
         "lat": 59.892157640830895,
         "lon": 30.331853759646165,
         "alt_geom": 36,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "school_corner1",
+        "hex": "SC1",
+        "lat": 59.887091702665174,
+        "lon": 30.314740639508955,
+        "alt_geom": 17,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "school_corner2",
+        "hex": "SC2",
+        "lat": 59.88727211020935,
+        "lon": 30.314743425673853,
+        "alt_geom": 17,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "school_corner3",
+        "hex": "SC3",
+        "lat": 59.88726935823724,
+        "lon": 30.31686926950906,
+        "alt_geom": 17,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "school_corner4",
+        "hex": "SC4",
+        "lat": 59.88708908172515,
+        "lon": 30.31686926950906,
+        "alt_geom": 17,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "balc_tower",
+        "hex": "BT1",
+        "lat": 59.88091425489907,
+        "lon": 30.30082830509681,
+        "alt_baro": 18,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "balc_pipe_right",
+        "hex": "BP1",
+        "lat": 59.872104054364975,
+        "lon": 30.245501542847471,
+        "alt_baro": 60,
+        "gs": 0,
+        "mag_heading": 0
+    },
+    {
+        "flight": "balc_pipe_left",
+        "hex": "BP2",
+        "lat": 59.870010709409726,
+        "lon": 30.242041338072724,
+        "alt_baro": 60,
         "gs": 0,
         "mag_heading": 0
     }

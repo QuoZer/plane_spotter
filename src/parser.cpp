@@ -18,6 +18,11 @@ namespace plane_spotter
             timestamp = js_struct["now"];
             
             for (auto& flight: js_struct["aircraft"]) {
+                // skip partial readings 
+                if (! (flight.contains("hex") && flight.contains("flight") && 
+                        flight.contains("mag_heading") && flight.contains("gs") && 
+                        flight.contains("lat") && flight.contains("lon") && flight.contains("alt_baro")) ) continue;
+
                 flights.emplace_back(flight);
             }
         }
@@ -30,13 +35,15 @@ namespace plane_spotter
     AircraftData::AircraftData(const json& js_struct) {
         try
         {
-            hex = js_struct["hex"];
-            flight = js_struct["flight"];
+            hex = js_struct.at("hex");
+            flight = js_struct.at("flight");
 
-            heading = js_struct["mag_heading"];
-            speed = js_struct["gs"];
+            heading = js_struct.at("mag_heading");
+            speed = js_struct.at("gs");  // knots?
 
-            pos = WGS_Pos{js_struct["lat"], js_struct["lon"], js_struct["alt_geom"]};
+            double alt_m = static_cast<double>(js_struct.at("alt_baro"))*0.303;
+
+            pos = WGS_Pos{js_struct.at("lat"), js_struct.at("lon"), alt_m};
         }
         catch(const std::exception& e)
         {

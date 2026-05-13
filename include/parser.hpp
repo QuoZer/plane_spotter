@@ -34,6 +34,4 @@ struct AircraftMsg {
 };
 
 
-
-
 }
