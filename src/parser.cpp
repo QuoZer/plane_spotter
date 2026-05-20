@@ -12,6 +12,18 @@ namespace plane_spotter
         return data;
     }
 
+    ECEF_Pos::ECEF_Pos(const WGS_Pos& wgs) {
+        const Geo& earth = Geo::WGS84();
+
+        earth.Forward(wgs.lat, wgs.lon, wgs.alt, 
+                      x, y, z);
+    }
+
+    ECEF_Pos& ECEF_Pos::operator=(const cv::Point3d& p) {
+        cv::Point3d::operator=(p);
+        return *this;
+    }
+
     AircraftMsg::AircraftMsg(const json& js_struct) {
         try
         {
@@ -41,7 +53,8 @@ namespace plane_spotter
             heading = js_struct.at("mag_heading");
             speed = js_struct.at("gs");  // knots?
 
-            double alt_m = static_cast<double>(js_struct.at("alt_baro"))*0.303;
+            double ft2m = 0.3048;
+            double alt_m = static_cast<double>(js_struct.at("alt_baro"))*ft2m;
 
             pos = WGS_Pos{js_struct.at("lat"), js_struct.at("lon"), alt_m};
         }

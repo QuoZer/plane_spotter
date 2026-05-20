@@ -22,7 +22,7 @@ namespace plane_spotter
 
         for (auto& aircraft: new_msg.flights) {
             // create the pos object and fill in-camera coords (TODO: move inside PlanePos?)
-            PlanePos new_pos(new_msg.timestamp, aircraft.pos);
+            PlanePos new_pos(new_msg.timestamp, aircraft);
             new_pos.pos_in_camera = transform_coords(new_pos.wgs); 
 
             if (history.find(aircraft.hex) == history.end()) {
@@ -31,10 +31,10 @@ namespace plane_spotter
                 new_plane.flight_no = aircraft.flight;
                 new_plane.add_pos(new_pos);
 
-                history.insert( {aircraft.hex, new_plane} ); 
+                history.insert( {aircraft.hex, AircraftView{new_plane} } ); 
             }
             else {
-                history[aircraft.hex].add_pos(new_pos); 
+                history[aircraft.hex].aircraft.add_pos(new_pos); 
             }
         }
     }
@@ -55,23 +55,31 @@ namespace plane_spotter
         // 1. upd history in relevant planes and transform new positions to the camera's frame 
         upd_history(new_msg);
 
+        auto now = [](){ return std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::system_clock::now().time_since_epoch() ).count() / 1000.0; }; 
+
         // for each:
-        for (auto& [k, v]: history) {
-            cv::Point3d local_pos = v.pos_history.back().pos_in_camera; 
-            cv::Point3d predicted_pos = v.dead_reckoning();        
+        for (auto& [hex, view]: history) {
+            if (new_msg.timestamp - view.aircraft.last_ts > marker_decay) continue;
+            // 2. predict actual pos 
+            PlanePos& last_pos = view.aircraft.pos_history.back(); 
+            cv::Vec3d lead_vec = view.aircraft.dead_reckoning();     
+            
+            cv::Point3d predicted_pos = lead_vec * (now() - last_pos.timestamp);
             
             // 3. project to camera 
-            cv::Point2d pixel = camera.projectWorldToPixel(local_pos);
+            cv::Point2d pixel = camera.projectWorldToPixel(last_pos.pos_in_camera);
             cv::Point2d pred_pixel = camera.projectWorldToPixel(predicted_pos);
+
+            view.track.push_back(pixel);
 
             // 4. local search ?
             // pixel = enhance(pixel);
             
-            std::cout << k << std::endl;
-            std::cout << "Located at: (cart): " << local_pos.x << " | " << local_pos.y << " | " << local_pos.z << std::endl; 
+            std::cout << hex << std::endl;
+            std::cout << "Located at: (cart): " << last_pos.pos_in_camera.x << " | " << last_pos.pos_in_camera.y << " | " << last_pos.pos_in_camera.z << std::endl; 
             std::cout << "\t(pix): " << pixel.x << " | " << pixel.y << std::endl; 
 
-            draw(canvas, k, pixel, pred_pixel);
+            draw(canvas, hex, pixel, pred_pixel);
         }
 
         // check for stale flights, cleanup 

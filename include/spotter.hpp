@@ -9,9 +9,17 @@
 #include <camera.hpp>
 #include <parser.hpp>
 
+#include <chrono>
+
 namespace plane_spotter
 {
     using json = nlohmann::json;
+
+    struct AircraftView {
+        Plane aircraft;
+        std::vector<cv::Point2i> track; // pixel trail 
+    };
+
 
     class Spotter {
     private:
@@ -22,12 +30,13 @@ namespace plane_spotter
         VecRot cam_rot;
         gl::LocalCartesian camera_pos_projector; 
 
-        std::unordered_map<std::string, Plane> history; // hex: PlaneObject
+        std::unordered_map<std::string, AircraftView> history; // hex: PlaneObject
 
         Camera camera; 
         cv::Mat canvas; 
 
         const double PI = 3.141592653589;
+        const int marker_decay = 20; // s, until we consider the plane's position outdated 
 
     public:
         Spotter(json app_params, json camera_params);
@@ -45,6 +54,7 @@ namespace plane_spotter
         void upd_history(const AircraftMsg& new_msg);
 
     };
+
     
     
 } // namespace spotter
