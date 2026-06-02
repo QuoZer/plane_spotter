@@ -32,17 +32,20 @@ int main(int argc, char* argv[]) {
 
     // parse camera params
     json camera_params = read_json(camera_config);
-    Spotter spotter(app_params, camera_params);
 
+    Spotter spotter(app_params, camera_params);
 
     while (keep_running) {
         // parse input coords (=>fetch from api)
-        json js_input = read_json(test_coords);
-        AircraftMsg input(js_input);
+        // json js_input = read_json(test_coords);
+        // AircraftMsg input(js_input);
+
+        AircraftMsg input = get_api_planes(app_params["api_key"], 59.717185321041406, 30.048275286082657, 
+                                                                  59.90572758595382,  30.32474264337777);
 
         std::cout << "tracking: " << input.flights.size() << " aircraft." << std::endl;
         
-        // read image (=> stream from camera)
+        // read image (TODO: stream from camera)
         cv::Mat img = cv::imread(img_path, cv::IMREAD_COLOR);
         if (img.empty()) {
             std::cout << "Error: Could not read the image." << std::endl;

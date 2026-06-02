@@ -1,7 +1,10 @@
 #pragma once
 #include <iostream>
 #include <fstream>
+#include <chrono>
+
 #include <nlohmann/json.hpp>
+#include <cpr/cpr.h>
 #include <opencv2/opencv.hpp>
 #include <GeographicLib/Geocentric.hpp>
 #include <GeographicLib/LocalCartesian.hpp>
@@ -12,7 +15,6 @@ namespace plane_spotter {
 using json = nlohmann::json;
 using Geo = GeographicLib::Geocentric;
 
-json read_json(std::string path);
 
 // position in wgs coordinates 
 struct WGS_Pos {
@@ -32,7 +34,7 @@ struct ECEF_Pos: public cv::Point3d {
 };
 
 struct VecRot {
-    // Euler angle rotation 
+    // Euler angle vector
     double roll;
     double pitch;
     double yaw;
@@ -48,17 +50,29 @@ struct AircraftData {
     std::string hex;
     std::string flight;
 
+    AircraftData(const std::string& flight_hex, const std::string& flight_no, double heading_, double groundspeed,
+                 double lat, double lon, double alt): pos{lat, lon, alt}, heading(heading_), speed(groundspeed),
+                 hex(flight_hex), flight(flight_no) {};
     AircraftData(const json& js_struct);
 };
 
 struct AircraftMsg {
     // Describes the messages coming from dump1090 
-
     double timestamp;
     std::vector<AircraftData> flights; 
 
+    AircraftMsg() =default; 
+    AircraftMsg(double ts, std::vector<AircraftData>& planes): timestamp(ts), flights(planes) {};  // or steal with &&? 
     AircraftMsg(const json& js_struct);  
+
+    static AircraftMsg fromDump1090(const json& js_struct); 
+    static AircraftMsg fromAPI(const json& js_struct); 
 };
 
+// reads a json file on path and returns a nlohmann::json object
+json read_json(std::string path);
+
+// get planes from FlightAware api within the coordinates (top left, bottom right)
+AircraftMsg get_api_planes(std::string api_key, double min_lat, double min_lon, double max_lat, double max_lon);
 
 }
