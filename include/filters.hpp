@@ -11,8 +11,11 @@
     state transition (dt):
     x_n+1 = [x + vx*dt, y + vy*dt, z + vz*dt, vx, vy, vz]
 
-    measurement:
+    measurement (cv):
     [u, v] = CameraModel * R * [x, y, z]  (transformCoords())
+
+    measurement (ads-b) filly observes the position:
+    [x, y, z]^T = Hsel * x_n
 
     */
 

@@ -18,8 +18,8 @@ namespace plane_spotter
 class Camera
 {
 public:	///* Parameters *///
-	float xFov;							
-	float yFov;								
+	double xFov;							
+	double yFov;								
 	cv::Size newSize;					
 	std::string modelName;
     

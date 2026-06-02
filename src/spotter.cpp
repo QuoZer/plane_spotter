@@ -13,6 +13,7 @@ namespace plane_spotter
         
         camera.setIntrinsics(img_size, camera_params["fx"], camera_params["fy"]);
         camera.setExtrinsics(cam_pos, cam_rot);
+
         camera_pos_projector = gl::LocalCartesian(app_params["lat"], app_params["lon"], app_params["alt"]);
 
         canvas = cv::Mat(img_size, CV_8UC3);
@@ -49,6 +50,74 @@ namespace plane_spotter
         cv::Point3d camera_point{local_point.x, -local_point.z, local_point.y};
 
         return camera_point; 
+    }
+
+    Matrix<double, 3, 3> Spotter::getRotationMatrix(double roll, double pitch, double yaw)
+    {
+        // TODO: use eigen rotations instead? 
+        Matrix<double, 3, 3> rotX{{1.0,        0.0,       0.0  },
+                                  {0.0,  cos(pitch), sin(pitch)},
+                                  {0.0, -sin(pitch), cos(pitch)}
+                                };
+
+        Matrix<double, 3, 3> rotY{ {cos(roll), 0.0, -sin(roll)},
+                                   {0.0,      1.0,     0.0    },
+                                   {sin(roll), 0.0, cos(roll) }
+                                };
+
+        Matrix<double, 3, 3> rotZ{  {cos(yaw), -sin(yaw),  0.0},
+                                    {sin(yaw), cos(yaw),   0.0},
+                                    {0.0,      0.0,        1.0}
+                                };
+
+        Matrix<double, 3, 3> R = rotZ * rotY * rotX;
+        
+        return R;         
+    }
+
+        
+    void Spotter::fuse(std::optional<cv::Point3d> adsb_pos, std::optional<cv::Point2d> cv_pos, double dt) {
+        // TODO: move constant matricies somewhere 
+        // new_pos = pos + vel*dt
+        Matrix<double, 6, 6> F = Matrix<double, 6, 6>::Identity();
+        F.block<3,3>(3, 0) = Matrix<double, 3, 3>::Identity() * dt; 
+        
+        Matrix<double, 3, 3> Qads = Matrix<double, 3, 3>::Identity();
+        Matrix<double, 3, 3> Rads = Matrix<double, 3, 3>::Identity();
+        
+        // ADS-B measurements 
+        Matrix<double, 3, 6> Hads = Matrix<double, 3, 6>::Zero();
+        Hads.block<3,3>(0, 0) = Matrix<double, 3, 3>::Identity(); 
+        ADSBModel<3, 6> adsb_model(Hads, Qads, Rads);
+
+        // CV measurements
+        Matrix<double, 3, 3> R = getRotationMatrix(camera.R.roll, camera.R.pitch, camera.R.yaw); 
+        Matrix<double, 3, 6> Hcv = R * Hads; // Hads is a selection matrix already
+
+        Matrix<double, 2, 2> Qcv = Matrix<double, 2, 2>::Identity();
+        Matrix<double, 2, 2> Rcv = Matrix<double, 2, 2>::Identity();
+        CVModel<2, 6> cv_model(&camera, Hcv, Qcv, Rcv);
+        
+        if (filter_init)  filter->predict(); 
+
+        if (adsb_pos && !filter_init) {
+            Vector<double, 6> x; // unpack adsb_pos + vel 
+            Matrix<double, 6, 6> P = Matrix<double, 6, 6>::Identity();
+            Matrix<double, 6, 6> Q = Matrix<double, 6, 6>::Identity();
+            filter = new EKF<6> (F, Q, x, P); 
+            filter_init = true;
+        }
+        else if (adsb_pos) {
+            Eigen::Vector3d eigen_adsb_pos; 
+            eigen_adsb_pos[0] = adsb_pos->x; eigen_adsb_pos[1] = adsb_pos->y; eigen_adsb_pos[2] = adsb_pos->z;
+            filter->update(adsb_model, eigen_adsb_pos);
+        }
+        else if (cv_pos) {
+            Eigen::Vector2d eigen_cv_pos; 
+            eigen_cv_pos[0] = cv_pos->x; eigen_cv_pos[1] = cv_pos->y; 
+            filter->update(cv_model, eigen_cv_pos);
+        }
+
     }
 
     int Spotter::predict(AircraftMsg new_msg) {

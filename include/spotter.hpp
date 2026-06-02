@@ -8,8 +8,10 @@
 #include <plane.hpp>
 #include <camera.hpp>
 #include <parser.hpp>
+#include <filters.hpp>
 
 #include <chrono>
+#include <optional>
 
 namespace plane_spotter
 {
@@ -33,10 +35,14 @@ namespace plane_spotter
         std::unordered_map<std::string, AircraftView> history; // hex: PlaneObject
 
         Camera camera; 
+        EKF<6> *filter;
+
         cv::Mat canvas; 
 
         const double PI = 3.141592653589;
         const int marker_decay = 20; // s, until we consider the plane's position outdated 
+
+        bool filter_init = false;
 
     public:
         Spotter(json app_params, json camera_params);
@@ -47,7 +53,11 @@ namespace plane_spotter
 
         cv::Point3d transform_coords(WGS_Pos world_coords);
 
+        Matrix<double, 3, 3> getRotationMatrix(double roll, double pitch, double yaw);
+
     private:
+
+        void fuse(std::optional<cv::Point3d> adsb_pos, std::optional<cv::Point2d> cv_pos, double dt);
 
         void draw(cv::Mat& canvas, std::string name, cv::Point2d target, cv::Point2d prediction);
 
