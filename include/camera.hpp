@@ -26,6 +26,8 @@ public:	///* Parameters *///
 	cv::Vec3d T;
 	VecRot R;
 
+	const double PI = 3.141592653589;
+
 	cv::Vec2d centerOffset;				// Distortion center
 	cv::Matx22d stretchMatrix;
 

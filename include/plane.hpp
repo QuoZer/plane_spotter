@@ -38,13 +38,13 @@ struct Plane {
     double last_ts; 
 
     const double K2MS =  0.514444; // knots to m/s
-    const double expected_delay = 1; // s, how stale is plane's position when it arrives 
     
     Plane(): pos_history(10) {}; // TODO: this is generally not good 
     Plane(std::string flight): flight_no(flight), pos_history(10) {};
 
     void add_pos(PlanePos plane_pos);
 
+    // get plane's moving direction from last two positions 
     cv::Vec3d dead_reckoning();
 };
 

@@ -3,7 +3,7 @@
 namespace plane_spotter
 {
 
-    Spotter::Spotter(json app_params, json camera_params):  app_params_(app_params) {
+    Spotter::Spotter(const json& app_params, const json& camera_params):  app_params_(app_params) {
         cv::Size img_size(camera_params["width"], camera_params["height"]);
 
         cam_pos = ECEF_Pos(WGS_Pos{app_params["lat"], app_params["lon"], app_params["alt"]});
@@ -47,7 +47,7 @@ namespace plane_spotter
                                      local_point.x, local_point.y, local_point.z);
 
         // ENU to opencv
-        cv::Point3d camera_point{local_point.x, -local_point.z, local_point.y};
+        cv::Point3d camera_point{local_point.x, local_point.y, local_point.z};
 
         return camera_point; 
     }
@@ -133,7 +133,7 @@ namespace plane_spotter
             PlanePos& last_pos = view.aircraft.pos_history.back(); 
             cv::Vec3d lead_vec = view.aircraft.dead_reckoning();     
             
-            cv::Point3d predicted_pos = lead_vec * (now() - last_pos.timestamp);
+            cv::Point3d predicted_pos = last_pos.pos_in_camera + cv::Point3d(lead_vec * (now() - last_pos.timestamp));
             
             // 3. project to camera 
             cv::Point2d pixel = camera.projectWorldToPixel(last_pos.pos_in_camera);

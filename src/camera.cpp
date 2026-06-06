@@ -22,23 +22,24 @@ void Camera::toCorner(cv::Point& centerPixel, cv::Size imagesize)
 
 cv::Point3d Camera::rotatePoint(const cv::Point3d& worldPoint, double roll, double pitch, double yaw)
 {
-    cv::Mat in_point(1, 3, CV_64F, double(0));
+    cv::Mat in_point(3, 1, CV_64F, double(0));
     in_point.at<double>(0) = worldPoint.x;
     in_point.at<double>(1) = worldPoint.y;
     in_point.at<double>(2) = worldPoint.z;
 
-    cv::Mat rotZ(cv::Matx33d(1, 0, 0,
-                            0, cos(yaw), sin(yaw),
-                            0, -sin(yaw), cos(yaw)));
-    cv::Mat rotX(cv::Matx33d(cos(pitch), 0, -sin(pitch),
-                            0, 1, 0,
-                            sin(pitch), 0, cos(pitch)));
-    cv::Mat rotY(cv::Matx33d(cos(roll), -sin(roll), 0,
-                            sin(roll), cos(roll), 0,
-                            0, 0, 1));
-    cv::Mat new_point = in_point * rotY * rotZ * rotX;
+    cv::Mat rotX(cv::Matx33d(1, 0,           0,
+                             0, cos(pitch), -sin(pitch),
+                             0, sin(pitch),  cos(pitch)));
+    cv::Mat rotY(cv::Matx33d(cos(roll), 0,  sin(roll),
+                                 0,     1,  0,
+                            -sin(roll), 0,  cos(roll)));
+    cv::Mat rotZ(cv::Matx33d(cos(yaw), -sin(yaw), 0,
+                             sin(yaw),  cos(yaw), 0,
+                             0,         0,        1));
+                             
+    cv::Mat new_point = rotZ * rotY * rotX * in_point;
     
-    return cv::Point3d(new_point);         // opencv calib3d/utils  proposes this order
+    return cv::Point3d(new_point);        
 }
 
 void Camera::setExtrinsics(cv::Vec3d pos, VecRot rot)
@@ -54,11 +55,6 @@ void Camera::setIntrinsics(cv::Size newsize, double xF, double yF)
     yFov = yF;           // * 9/16 - vertical fov
 }
 
-void Camera::setModelName(std::string modelName)
-{
-	this->modelName = modelName;
-}
-
 
 bool Camera::check_pose(cv::Point3d local_coords) {
     // TODO: implement
@@ -71,20 +67,18 @@ bool Camera::check_pose(cv::Point3d local_coords) {
 cv::Point2i Camera::projectWorldToPixel(cv::Point3d worldPoint)
 {
     // correct for camera rotation 
-    cv::Point3d cam_point = rotatePoint(worldPoint, R.roll, -R.yaw, R.pitch);
+    cv::Point3d rot_point = rotatePoint(worldPoint, R.roll, R.pitch, R.yaw);
+    cv::Point3d cam_point = rotatePoint(rot_point, 0, PI/2, 0); // Z-up to Z-forward
     
     if (!check_pose(cam_point)) return {-1, -1};
-
-    double xPinholeFocus = xFov;
-    double yPinholeFocus = yFov;
 
     double cx = cam_point.x;
     double cy = cam_point.y;
     double cz = cam_point.z;
 
     cv::Point2i pinholePoint;
-    pinholePoint.x = xPinholeFocus * cx / cz;
-    pinholePoint.y = yPinholeFocus * cy / cz;
+    pinholePoint.x = xFov * cx / cz;
+    pinholePoint.y = yFov * cy / cz;
 
     toCorner(pinholePoint, newSize);
 

@@ -45,7 +45,7 @@ namespace plane_spotter
         bool filter_init = false;
 
     public:
-        Spotter(json app_params, json camera_params);
+        Spotter(const json& app_params, const json& camera_params);
 
         int predict(AircraftMsg new_msg);
 
